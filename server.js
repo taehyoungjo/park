@@ -6,8 +6,8 @@ var io = require("socket.io").listen(server);
 
 var players = {};
 var star = {
-  x: Math.floor(Math.random() * 284) + 50,
-  y: Math.floor(Math.random() * 156) + 50,
+  x: Math.floor(Math.random() * 1052) + 50,
+  y: Math.floor(Math.random() * 380) + 338,
   //   x: Math.floor(Math.random() * 700) + 50,
   //   y: Math.floor(Math.random() * 500) + 50,
 };
@@ -72,8 +72,8 @@ io.on("connection", function (socket) {
     } else {
       scores.blue += 10;
     }
-    star.x = Math.floor(Math.random() * 284) + 50;
-    star.y = Math.floor(Math.random() * 156) + 50;
+    star.x = Math.floor(Math.random() * 1052) + 50;
+    star.y = Math.floor(Math.random() * 380) + 338;
     // star.x = Math.floor(Math.random() * 700) + 50;
     // star.y = Math.floor(Math.random() * 500) + 50;
     io.emit("starLocation", star);

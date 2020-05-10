@@ -29,7 +29,7 @@ function preload() {
   // this.load.image("ship", "assets/slime.png");
   // this.load.image("ship", "assets/spaceShips_001.png");
 
-  this.load.spritesheet("ship", "assets/slime_frames.png", {
+  this.load.spritesheet("slime", "assets/slime_frames.png", {
     frameWidth: 93,
     frameHeight: 93,
   });
@@ -50,28 +50,28 @@ function create() {
 
   this.anims.create({
     key: "right",
-    frames: this.anims.generateFrameNumbers("ship", { start: 0, end: 4 }),
+    frames: this.anims.generateFrameNumbers("slime", { start: 0, end: 4 }),
     frameRate: 10,
     repeat: -1,
   });
 
   this.anims.create({
     key: "left",
-    frames: this.anims.generateFrameNumbers("ship", { start: 5, end: 9 }),
+    frames: this.anims.generateFrameNumbers("slime", { start: 5, end: 9 }),
     frameRate: 10,
     repeat: -1,
   });
 
   this.anims.create({
     key: "up",
-    frames: this.anims.generateFrameNumbers("ship", { start: 10, end: 14 }),
+    frames: this.anims.generateFrameNumbers("slime", { start: 10, end: 14 }),
     frameRate: 10,
     repeat: -1,
   });
 
   this.anims.create({
     key: "down",
-    frames: this.anims.generateFrameNumbers("ship", { start: 15, end: 19 }),
+    frames: this.anims.generateFrameNumbers("slime", { start: 15, end: 19 }),
     frameRate: 10,
     repeat: -1,
   });
@@ -103,6 +103,23 @@ function create() {
     self.otherPlayers.getChildren().forEach(function (otherPlayer) {
       if (playerInfo.playerId === otherPlayer.playerId) {
         // otherPlayer.setRotation(playerInfo.rotation);
+        console.log(playerInfo.rotation);
+        switch (playerInfo.rotation) {
+          case 1:
+            otherPlayer.anims.play("up", true);
+            break;
+          case 2:
+            otherPlayer.anims.play("right", true);
+            break;
+          case 3:
+            otherPlayer.anims.play("down", true);
+            break;
+          case 4:
+            otherPlayer.anims.play("left", true);
+            break;
+          default:
+            otherPlayer.anims.play("down", true);
+        }
         otherPlayer.setPosition(playerInfo.x, playerInfo.y);
       }
     });
@@ -142,64 +159,85 @@ function create() {
 
 function update() {
   if (this.ship) {
-    if (this.cursors.left.isDown) {
-      // this.ship.setAngularVelocity(-150);
+    var r;
 
+    if (this.cursors.left.isDown) {
       this.ship.setVelocityX(-160);
 
-      this.ship.anims.play("left", true);
+      if (this.cursors.up.isDown) {
+        this.ship.setVelocityY(-160);
+        this.ship.anims.play("up", true);
+        r = 1;
+      } else if (this.cursors.down.isDown) {
+        this.ship.setVelocityY(160);
+        this.ship.anims.play("left", true);
+        r = 4;
+      } else {
+        this.ship.setVelocityY(0);
+        this.ship.anims.play("left", true);
+        r = 4;
+      }
     } else if (this.cursors.right.isDown) {
-      // this.ship.setAngularVelocity(150);
-
       this.ship.setVelocityX(160);
 
-      this.ship.anims.play("right", true);
-      // player.anims.play('right', true);
+      if (this.cursors.up.isDown) {
+        this.ship.setVelocityY(-160);
+        this.ship.anims.play("up", true);
+        r = 1;
+      } else if (this.cursors.down.isDown) {
+        this.ship.setVelocityY(160);
+        this.ship.anims.play("right", true);
+        r = 2;
+      } else {
+        this.ship.setVelocityY(0);
+        this.ship.anims.play("right", true);
+        r = 2;
+      }
     } else {
-      // this.ship.setAngularVelocity(0);
-
       this.ship.setVelocityX(0);
 
-      // this.ship.anims.play("down", true);
+      if (this.cursors.up.isDown) {
+        this.ship.setVelocityY(-160);
+        this.ship.anims.play("up", true);
+        r = 1;
+      } else if (this.cursors.down.isDown) {
+        this.ship.setVelocityY(160);
+        this.ship.anims.play("down", true);
+        r = 3;
+      } else {
+        this.ship.setVelocityY(0);
+        // this.ship.anims.play("down", true);
+      }
     }
 
-    if (this.cursors.up.isDown) {
-      //   this.physics.velocityFromRotation(
-      //     this.ship.rotation + 1.5,
-      //     100,
-      //     this.ship.body.acceleration
-      //   );
-      this.ship.setVelocityY(-160);
-
-      this.ship.anims.play("up", true);
-    } else if (this.cursors.down.isDown) {
-      this.ship.setVelocityY(160);
-
-      this.ship.anims.play("down", true);
-    } else {
-      this.ship.setVelocityY(0);
-
-      // this.ship.anims.play("down", true);
-      // this.ship.setAcceleration(0);
-    }
+    // if (this.cursors.left.isDown && this.cursors.up.isDown)
 
     // World wrap is broken
     // this.physics.world.wrap(this.ship, 5);
 
+    // WE SHOULD BE EMITTING DIRECTION FACING
+    // 1 1 1
+    // 4   2
+    // 4 3 2
+    // THESE CAN BE THE DIRECTIONS FOR NOW
+
     // emit player movement
     var x = this.ship.x;
     var y = this.ship.y;
-    var r = this.ship.rotation;
+    // var r = this.ship.rotation;
     if (
       this.ship.oldPosition &&
-      (x !== this.ship.oldPosition.x ||
-        y !== this.ship.oldPosition.y ||
-        r !== this.ship.oldPosition.rotation)
+      (x !== this.ship.oldPosition.x || y !== this.ship.oldPosition.y)
     ) {
       this.socket.emit("playerMovement", {
         x: this.ship.x,
         y: this.ship.y,
-        rotation: this.ship.rotation,
+        rotation: r
+          ? r
+          : this.ship.oldPosition
+          ? this.ship.oldPosition.rotation
+          : 3,
+        // rotation: this.ship.rotation,
       });
     }
 
@@ -207,14 +245,19 @@ function update() {
     this.ship.oldPosition = {
       x: this.ship.x,
       y: this.ship.y,
-      rotation: this.ship.rotation,
+      rotation: r
+        ? r
+        : this.ship.oldPosition
+        ? this.ship.oldPosition.rotation
+        : 3,
+      // rotation: this.ship.rotation,
     };
   }
 }
 
 function addPlayer(self, playerInfo) {
   self.ship = self.physics.add
-    .sprite(playerInfo.x, playerInfo.y, "ship")
+    .sprite(playerInfo.x, playerInfo.y, "slime")
     .setOrigin(0.5, 0.5)
     .setDisplaySize(93, 93);
   // .setDisplaySize(53, 40);
@@ -223,6 +266,7 @@ function addPlayer(self, playerInfo) {
   } else {
     // self.ship.setTint(0xff0000);
   }
+  self.ship.anims.play("down", true);
   //   self.ship.setDrag(100);
   //   self.ship.setAngularDrag(100);
   //   self.ship.setMaxVelocity(200);
@@ -239,5 +283,8 @@ function addOtherPlayers(self, playerInfo) {
     otherPlayer.setTint(0xff0000);
   }
   otherPlayer.playerId = playerInfo.playerId;
+
+  otherPlayer.anims.play("down", true);
   self.otherPlayers.add(otherPlayer);
+  console.log(self.otherPlayers);
 }
