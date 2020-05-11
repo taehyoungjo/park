@@ -267,6 +267,7 @@ function addPlayer(self, playerInfo) {
     // self.ship.setTint(0xff0000);
   }
   self.ship.anims.play("down", true);
+  self.ship.setCollideWorldBounds(true);
   //   self.ship.setDrag(100);
   //   self.ship.setAngularDrag(100);
   //   self.ship.setMaxVelocity(200);
