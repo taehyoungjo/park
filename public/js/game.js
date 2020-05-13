@@ -33,7 +33,8 @@ function preload() {
     frameHeight: 31,
   });
 
-  this.load.image("star", "assets/star_gold.png");
+  // this.load.image("star", "assets/star_gold.png");
+  this.load.image("flower", "assets/flower.png");
   this.load.image("ball", "assets/ball.png");
 
   this.load.spritesheet("splash", "assets/splash.png", {
@@ -49,6 +50,7 @@ function create() {
 
   // need more descriptive name for tileset
   const tileset = map.addTilesetImage("tileset", "tiles");
+  const sky = map.createStaticLayer("Sky", tileset, 0, 0);
   const ground = map.createStaticLayer("Ground", tileset, 0, 0);
   const water = map.createDynamicLayer("Water", tileset, 0, 0);
   const skyBarrier = map.createStaticLayer("Sky_barrier", tileset, 0, 0);
@@ -94,12 +96,12 @@ function create() {
     });
   });
 
-  const debugGraphics = this.add.graphics().setAlpha(0.75);
-  skyBarrier.renderDebug(debugGraphics, {
-    tileColor: null, // Color of non-colliding tiles
-    collidingTileColor: new Phaser.Display.Color(243, 134, 48, 255), // Color of colliding tiles
-    faceColor: new Phaser.Display.Color(40, 39, 37, 255), // Color of colliding face edges
-  });
+  //   const debugGraphics = this.add.graphics().setAlpha(0.75);
+  //   skyBarrier.renderDebug(debugGraphics, {
+  //     tileColor: null, // Color of non-colliding tiles
+  //     collidingTileColor: new Phaser.Display.Color(243, 134, 48, 255), // Color of colliding tiles
+  //     faceColor: new Phaser.Display.Color(40, 39, 37, 255), // Color of colliding face edges
+  //   });
 
   this.socket.on("newPlayer", function (playerInfo) {
     addOtherPlayers(self, playerInfo);
@@ -162,7 +164,11 @@ function create() {
 
   this.socket.on("starLocation", function (starLocation) {
     if (self.star) self.star.destroy();
-    self.star = self.physics.add.image(starLocation.x, starLocation.y, "star");
+    self.star = self.physics.add.image(
+      starLocation.x,
+      starLocation.y,
+      "flower"
+    );
     self.physics.add.overlap(
       self.container,
       //   self.ship,
@@ -177,10 +183,17 @@ function create() {
 
   this.socket.on("ballLocation", function (ballLocation) {
     if (self.ball) self.ball.destroy();
-    self.ball = self.physics.add.image(ballLocation.x, ballLocation.y, "ball");
+
+    self.ball = self.physics.add.sprite(ballLocation.x, ballLocation.y, "ball");
     self.physics.add.collider(self.container, self.ball, (cb) => {
-      console.log(cb);
+      // console.log(cb);
     });
+
+    self.ball.setCollideWorldBounds(true);
+    self.physics.add.collider(self.ball, skyBarrier);
+    // self.physics.setBounce(1);
+    self.ball.setBounce(0.5, 1);
+    self.ball.setDrag(0.5);
     // self.ball.oldPosition = {
     //     x: -1,
     //     y: -1
